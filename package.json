@@ -1,0 +1,17 @@
+{
+  "name": "aurahabit",
+  "version": "1.0.0",
+  "description": "AuraHabit - Premium client-side Habit Tracker website",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y http-server -p 3000"
+  },
+  "keywords": [
+    "habit-tracker",
+    "aura",
+    "productivity",
+    "spa"
+  ],
+  "author": "Antigravity",
+  "license": "ISC"
+}

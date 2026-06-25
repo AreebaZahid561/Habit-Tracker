@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraHabit - Premium Habit Tracker</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Celebration Modal (Confetti / Badges) -->
+    <div id="celebration-modal" class="modal celebration-modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content celebration-content scale-in">
+            <div class="confetti-container"></div>
+            <div class="badge-glow-ring"></div>
+            <div class="celebration-badge-wrapper" id="celebration-badge-svg">
+                <!-- SVG injected dynamically -->
+            </div>
+            <h2 class="celebration-title">Achievement Unlocked!</h2>
+            <h3 class="celebration-badge-name" id="celebration-badge-name">Consistency King</h3>
+            <p class="celebration-badge-desc" id="celebration-badge-desc">Maintain a 7-day streak on any habit.</p>
+            <button class="btn btn-primary btn-glow" id="close-celebration-btn">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app" class="app-container">
+        
+        <!-- ========================================================= -->
+        <!-- 1. AUTHENTICATION PAGES CONTAINER (Full Screen) -->
+        <!-- ========================================================= -->
+        <div id="auth-container" class="auth-wrapper hidden">
+            <!-- Login Card -->
+            <div id="login-view" class="auth-card auth-fade-in">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <div class="logo-icon-wrapper">
+                            <i data-lucide="sparkles" class="logo-icon"></i>
+                        </div>
+                        <span class="logo-text">AuraHabit</span>
+                    </div>
+                    <h1>Welcome Back</h1>
+                    <p>Track. Improve. Succeed. Enter details to access dashboard.</p>
+                </div>
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="mail" class="input-icon"></i>
+                            <input type="email" id="login-email" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="login-password">Password</label>
+                            <a href="#" class="auth-link" id="goto-forgot-btn">Forgot Password?</a>
+                        </div>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock" class="input-icon"></i>
+                            <input type="password" id="login-password" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full btn-glow">Sign In</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="#" class="auth-link" id="goto-signup-btn">Create one now</a></p>
+                </div>
+            </div>
+
+            <!-- Sign Up Card -->
+            <div id="signup-view" class="auth-card auth-fade-in hidden">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <div class="logo-icon-wrapper">
+                            <i data-lucide="sparkles" class="logo-icon"></i>
+                        </div>
+                        <span class="logo-text">AuraHabit</span>
+                    </div>
+                    <h1>Create Account</h1>
+                    <p>Start your journey to positive change today.</p>
+                </div>
+                <form id="signup-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user" class="input-icon"></i>
+                            <input type="text" id="signup-name" placeholder="John Doe" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="mail" class="input-icon"></i>
+                            <input type="email" id="signup-email" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock" class="input-icon"></i>
+                            <input type="password" id="signup-password" placeholder="Min. 8 characters" minlength="8" required>
+                        </div>
+                    </div>
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="signup-mockdata" checked>
+                        <label for="signup-mockdata">Prepopulate with mock habits & historical logs (Recommended)</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full btn-glow">Sign Up</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="#" class="auth-link" id="goto-login-btn">Sign in here</a></p>
+                </div>
+            </div>
+
+            <!-- Forgot Password Card -->
+            <div id="forgot-view" class="auth-card auth-fade-in hidden">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <div class="logo-icon-wrapper">
+                            <i data-lucide="sparkles" class="logo-icon"></i>
+                        </div>
+                        <span class="logo-text">AuraHabit</span>
+                    </div>
+                    <h1>Reset Password</h1>
+                    <p>Enter your email and we'll send a recovery password.</p>
+                </div>
+                <form id="forgot-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="forgot-email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="mail" class="input-icon"></i>
+                            <input type="email" id="forgot-email" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full btn-glow">Send Reset Instructions</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Remembered your password? <a href="#" class="auth-link" id="goto-login-from-forgot">Back to Login</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- 2. MAIN APPLICATION CONTENT LAYER -->
+        <!-- ========================================================= -->
+        <div id="dashboard-layout" class="dashboard-layout hidden">
+            
+            <!-- Sidebar Navigation (Desktop) -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="app-logo">
+                        <div class="logo-icon-wrapper">
+                            <i data-lucide="sparkles" class="logo-icon"></i>
+                        </div>
+                        <span class="logo-text">AuraHabit</span>
+                    </div>
+                </div>
+                
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li>
+                            <a href="#" class="nav-item active" data-target="dashboard">
+                                <i data-lucide="layout-dashboard" class="nav-icon"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item" data-target="add-habit-page">
+                                <i data-lucide="plus-circle" class="nav-icon"></i>
+                                <span>Add Habit</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item" data-target="analytics">
+                                <i data-lucide="trending-up" class="nav-icon"></i>
+                                <span>Analytics</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item" data-target="achievements">
+                                <i data-lucide="trophy" class="nav-icon"></i>
+                                <span>Achievements</span>
+                                <span class="badge-count hidden" id="badge-alert-count">0</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item" data-target="settings">
+                                <i data-lucide="settings" class="nav-icon"></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="user-profile-widget" id="sidebar-profile-widget">
+                        <div class="profile-avatar" id="sidebar-avatar">JD</div>
+                        <div class="profile-info">
+                            <h4 class="profile-name" id="sidebar-name">John Doe</h4>
+                            <p class="profile-email" id="sidebar-email">john@example.com</p>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="sidebar-logout-btn">
+                        <i data-lucide="log-out"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Bottom Navigation Bar (Mobile only) -->
+            <nav class="mobile-nav">
+                <a href="#" class="mobile-nav-item active" data-target="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-target="add-habit-page">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Add</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-target="analytics">
+                    <i data-lucide="trending-up"></i>
+                    <span>Stats</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-target="achievements">
+                    <i data-lucide="trophy"></i>
+                    <span>Badges</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-target="settings">
+                    <i data-lucide="settings"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Main Panel -->
+            <main class="main-content">
+                <!-- Top Header -->
+                <header class="top-header">
+                    <div class="header-welcome">
+                        <h2 id="header-greeting">Good morning, John</h2>
+                        <p id="header-date">Sunday, June 7, 2026</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="icon-btn" id="theme-toggle" aria-label="Toggle Dark Mode">
+                            <i data-lucide="sun" class="sun-icon"></i>
+                            <i data-lucide="moon" class="moon-icon"></i>
+                        </button>
+                        <div class="user-avatar-menu" id="header-avatar-btn">
+                            <div class="profile-avatar header-avatar" id="header-avatar">JD</div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- ========================================================= -->
+                <!-- VIEW 1: DASHBOARD -->
+                <!-- ========================================================= -->
+                <section id="view-dashboard" class="app-view">
+                    <!-- Progress Card Row -->
+                    <div class="progress-grid">
+                        <!-- Card 1: Today's Completion -->
+                        <div class="stats-card progress-circle-card">
+                            <div class="radial-progress-wrapper">
+                                <svg class="radial-progress-svg" viewBox="0 0 100 100">
+                                    <circle class="progress-bg-circle" cx="50" cy="50" r="40"></circle>
+                                    <circle class="progress-bar-circle" id="dashboard-progress-ring" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                                </svg>
+                                <div class="radial-progress-text">
+                                    <span class="pct-val" id="dashboard-progress-pct">0%</span>
+                                    <span class="pct-label">Completed</span>
+                                </div>
+                            </div>
+                            <div class="stats-card-info">
+                                <h3>Daily Progress</h3>
+                                <p id="dashboard-progress-ratio">0 of 0 habits complete</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Streak -->
+                        <div class="stats-card streak-card">
+                            <div class="streak-icon-wrapper animate-pulse">
+                                <i data-lucide="flame" class="streak-icon"></i>
+                            </div>
+                            <div class="stats-card-info">
+                                <h3>Current Streak</h3>
+                                <div class="streak-count-row">
+                                    <span class="big-stat-number" id="dashboard-streak">0</span>
+                                    <span class="big-stat-unit">days</span>
+                                </div>
+                                <p id="dashboard-streak-subtext">Keep the flame burning!</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Completion Rate -->
+                        <div class="stats-card habits-summary-card">
+                            <div class="summary-icon-wrapper">
+                                <i data-lucide="check-check" class="summary-icon"></i>
+                            </div>
+                            <div class="stats-card-info">
+                                <h3>Weekly Rate</h3>
+                                <div class="streak-count-row">
+                                    <span class="big-stat-number" id="dashboard-weekly-rate">0%</span>
+                                </div>
+                                <p id="dashboard-weekly-subtext">Completions this week</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Habits Section -->
+                    <div class="habits-section">
+                        <div class="section-header">
+                            <div class="title-with-count">
+                                <h2>Today's Habits</h2>
+                                <span class="badge" id="dashboard-active-count">0</span>
+                            </div>
+                            <div class="habits-filter-controls">
+                                <button class="filter-btn active" data-filter="all">All</button>
+                                <button class="filter-btn" data-filter="morning">Morning</button>
+                                <button class="filter-btn" data-filter="afternoon">Afternoon</button>
+                                <button class="filter-btn" data-filter="evening">Evening</button>
+                            </div>
+                        </div>
+
+                        <!-- Habits Grid -->
+                        <div class="habits-list-grid" id="habits-list-container">
+                            <!-- Habits cards injected dynamically -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="empty-state hidden" id="dashboard-empty-state">
+                            <div class="empty-icon-wrapper">
+                                <i data-lucide="clipboard-list" class="empty-icon"></i>
+                            </div>
+                            <h3>No Habits Yet</h3>
+                            <p>Transform your life by adding your first positive routine.</p>
+                            <button class="btn btn-primary btn-glow" id="dashboard-empty-add-btn">
+                                <i data-lucide="plus"></i> Add Your First Habit
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- VIEW 2: ADD HABIT (ALSO ACTS AS SUB-VIEW) -->
+                <!-- ========================================================= -->
+                <section id="view-add-habit-page" class="app-view hidden">
+                    <div class="page-container-narrow">
+                        <div class="back-nav">
+                            <a href="#" class="back-link-btn" data-target="dashboard">
+                                <i data-lucide="arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                        <div class="view-header">
+                            <h1 id="habit-form-page-title">Create New Habit</h1>
+                            <p>Set a custom title, schedule, and category for your routine.</p>
+                        </div>
+                        <form id="add-habit-page-form" class="form-container-card">
+                            <input type="hidden" id="habit-form-id" value="">
+                            <div class="form-group">
+                                <label for="habit-name-input">Habit Name</label>
+                                <div class="input-wrapper">
+                                    <i data-lucide="sparkles" class="input-icon"></i>
+                                    <input type="text" id="habit-name-input" placeholder="e.g. Morning Meditation" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="habit-desc-input">Description (Optional)</label>
+                                <div class="input-wrapper">
+                                    <i data-lucide="align-left" class="input-icon"></i>
+                                    <input type="text" id="habit-desc-input" placeholder="e.g. 10 minutes of box breathing">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="habit-category">Category</label>
+                                    <div class="select-wrapper">
+                                        <i data-lucide="tag" class="select-icon"></i>
+                                        <select id="habit-category">
+                                            <option value="Health">💪 Health</option>
+                                            <option value="Mind">🧠 Mind</option>
+                                            <option value="Work">💼 Work</option>
+                                            <option value="Finance">💵 Finance</option>
+                                            <option value="Social">🤝 Social</option>
+                                            <option value="Custom" selected>⭐ Custom</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="habit-time">Time of Day</label>
+                                    <div class="select-wrapper">
+                                        <i data-lucide="clock" class="select-icon"></i>
+                                        <select id="habit-time">
+                                            <option value="Anytime">Anytime</option>
+                                            <option value="Morning">Morning</option>
+                                            <option value="Afternoon">Afternoon</option>
+                                            <option value="Evening">Evening</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Frequency (Days of the week)</label>
+                                <div class="weekdays-selector">
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="habit-days" value="1" checked>
+                                        <span>M</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="habit-days" value="2" checked>
+                                        <span>T</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="habit-days" value="3" checked>
+                                        <span>W</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="habit-days" value="4" checked>
+                                        <span>T</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="habit-days" value="5" checked>
+                                        <span>F</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="habit-days" value="6" checked>
+                                        <span>S</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="habit-days" value="0" checked>
+                                        <span>S</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions-row">
+                                <button type="button" class="btn btn-secondary" id="cancel-habit-form-btn">Cancel</button>
+                                <button type="submit" class="btn btn-primary btn-glow" id="save-habit-form-btn">Create Habit</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- VIEW 3: ANALYTICS -->
+                <!-- ========================================================= -->
+                <section id="view-analytics" class="app-view hidden">
+                    <div class="view-header">
+                        <h1>Performance Analytics</h1>
+                        <p>Analyze trends, review completion percentages, and trace streaks.</p>
+                    </div>
+
+                    <!-- Statistics Cards Grid -->
+                    <div class="analytics-overview-grid">
+                        <div class="stat-box">
+                            <span class="stat-box-label">Total Habit Completions</span>
+                            <span class="stat-box-value" id="stats-total-completions">0</span>
+                            <span class="stat-box-footer">All-time record</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">Longest Active Streak</span>
+                            <span class="stat-box-value" id="stats-longest-streak">0</span>
+                            <span class="stat-box-footer">Consecutive days</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">Monthly Completion</span>
+                            <span class="stat-box-value" id="stats-monthly-pct">0%</span>
+                            <span class="stat-box-footer">Current calendar month</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">Unlocks Achieved</span>
+                            <span class="stat-box-value" id="stats-unlocked-badges">0/8</span>
+                            <span class="stat-box-footer">Badges collection</span>
+                        </div>
+                    </div>
+
+                    <!-- Charts Layout -->
+                    <div class="charts-layout-grid">
+                        <!-- Weekly Progress Chart -->
+                        <div class="chart-container-card">
+                            <div class="chart-card-header">
+                                <h3>Weekly Completions</h3>
+                                <p>Completions per day over the last 7 days</p>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="weeklyProgressChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Category Breakdown -->
+                        <div class="chart-container-card">
+                            <div class="chart-card-header">
+                                <h3>Category Distribution</h3>
+                                <p>Completion rates grouped by habit type</p>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="categoryDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- List of Habits Performance -->
+                    <div class="performance-list-card">
+                        <div class="chart-card-header">
+                            <h3>Habit Standings</h3>
+                            <p>Overview of each habit's metrics</p>
+                        </div>
+                        <div class="performance-table-wrapper">
+                            <table class="performance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Habit</th>
+                                        <th>Category</th>
+                                        <th>Streak</th>
+                                        <th>Total Done</th>
+                                        <th>Completions</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-table-body">
+                                    <!-- Injected dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- VIEW 4: ACHIEVEMENTS -->
+                <!-- ========================================================= -->
+                <section id="view-achievements" class="app-view hidden">
+                    <div class="view-header">
+                        <h1>Badges & Achievements</h1>
+                        <p>Complete your daily challenges and build consistency to unlock badges.</p>
+                    </div>
+
+                    <!-- Summary Tracker -->
+                    <div class="achievements-summary-card">
+                        <div class="ach-summary-info">
+                            <h2>Collection Progress</h2>
+                            <p>Unlock all 8 badges to become a Habit Master.</p>
+                        </div>
+                        <div class="ach-progress-bar-wrapper">
+                            <div class="ach-progress-bar-outer">
+                                <div class="ach-progress-bar-inner" id="ach-total-progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="ach-progress-text" id="ach-total-progress-text">0 / 8 Badges Unlocked</span>
+                        </div>
+                    </div>
+
+                    <!-- Badges Grid -->
+                    <div class="badges-grid" id="achievements-badges-grid">
+                        <!-- Badges dynamically rendered (SVGs inside cards) -->
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- VIEW 5: SETTINGS -->
+                <!-- ========================================================= -->
+                <section id="view-settings" class="app-view hidden">
+                    <div class="view-header">
+                        <h1>Account Settings</h1>
+                        <p>Manage your profile, change passwords, and configure the workspace.</p>
+                    </div>
+
+                    <div class="settings-grid">
+                        <!-- Left Pane: General Info -->
+                        <div class="settings-card flex-2">
+                            <div class="settings-card-header">
+                                <h3>Profile Details</h3>
+                                <p>Update your personal display name and email address</p>
+                            </div>
+                            <form id="profile-details-form" class="settings-form">
+                                <div class="avatar-select-container">
+                                    <label>Choose Avatar Icon Background</label>
+                                    <div class="avatar-colors-row">
+                                        <button type="button" class="avatar-color-btn active bg-violet" data-color="violet"></button>
+                                        <button type="button" class="avatar-color-btn bg-blue" data-color="blue"></button>
+                                        <button type="button" class="avatar-color-btn bg-emerald" data-color="emerald"></button>
+                                        <button type="button" class="avatar-color-btn bg-amber" data-color="amber"></button>
+                                        <button type="button" class="avatar-color-btn bg-rose" data-color="rose"></button>
+                                        <button type="button" class="avatar-color-btn bg-slate" data-color="slate"></button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="settings-display-name">Display Name</label>
+                                    <div class="input-wrapper">
+                                        <i data-lucide="user" class="input-icon"></i>
+                                        <input type="text" id="settings-display-name" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="settings-email">Email Address</label>
+                                    <div class="input-wrapper">
+                                        <i data-lucide="mail" class="input-icon"></i>
+                                        <input type="email" id="settings-email" disabled>
+                                    </div>
+                                    <span class="form-help-text">Email address changes are restricted in this version.</span>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-glow">Save Profile Details</button>
+                            </form>
+                        </div>
+
+                        <!-- Right Pane: Preference Controls -->
+                        <div class="settings-side-col">
+                            <!-- Theme & Alerts Card -->
+                            <div class="settings-card">
+                                <div class="settings-card-header">
+                                    <h3>System Preferences</h3>
+                                    <p>Configure interface settings</p>
+                                </div>
+                                <div class="settings-toggles-list">
+                                    <div class="toggle-row">
+                                        <div class="toggle-info">
+                                            <h4>Dark Mode</h4>
+                                            <p>Toggle high-contrast dark palette</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="settings-darkmode-toggle">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row">
+                                        <div class="toggle-info">
+                                            <h4>System Notifications</h4>
+                                            <p>Notify on reminder times</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="settings-notifications-toggle" checked>
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Security Card -->
+                            <div class="settings-card">
+                                <div class="settings-card-header">
+                                    <h3>Security Updates</h3>
+                                    <p>Change login credentials</p>
+                                </div>
+                                <form id="change-password-form" class="settings-form">
+                                    <div class="form-group">
+                                        <label for="settings-old-pass">Current Password</label>
+                                        <div class="input-wrapper">
+                                            <i data-lucide="lock" class="input-icon"></i>
+                                            <input type="password" id="settings-old-pass" placeholder="••••••••" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="settings-new-pass">New Password</label>
+                                        <div class="input-wrapper">
+                                            <i data-lucide="lock" class="input-icon"></i>
+                                            <input type="password" id="settings-new-pass" placeholder="••••••••" minlength="8" required>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-full btn-glow">Change Password</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- VIEW 6: HABIT DETAILS PAGE -->
+                <!-- ========================================================= -->
+                <section id="view-habit-details" class="app-view hidden">
+                    <div class="page-container-narrow">
+                        <div class="back-nav-row">
+                            <a href="#" class="back-link-btn" data-target="dashboard">
+                                <i data-lucide="arrow-left"></i> Back to Dashboard
+                            </a>
+                            <div class="detail-actions">
+                                <button class="btn btn-secondary btn-sm" id="detail-edit-btn">
+                                    <i data-lucide="edit-3"></i> Edit
+                                </button>
+                                <button class="btn btn-danger btn-sm" id="detail-delete-btn">
+                                    <i data-lucide="trash-2"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Habit Header Banner -->
+                        <div class="habit-details-banner">
+                            <div class="badge-tag" id="detail-category-badge">💪 Health</div>
+                            <h1 id="detail-habit-name">Morning Meditation</h1>
+                            <p class="habit-desc-para" id="detail-habit-desc">10 minutes of deep box breathing.</p>
+                            <div class="habit-meta-row">
+                                <span><i data-lucide="calendar"></i> Created: <strong id="detail-created-date">June 5, 2026</strong></span>
+                                <span><i data-lucide="clock"></i> Schedule: <strong id="detail-schedule-info">Daily (Morning)</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Stats Cards Grid -->
+                        <div class="details-stats-grid">
+                            <div class="detail-stat-card">
+                                <span class="num" id="detail-streak-current">0</span>
+                                <span class="label">Current Streak</span>
+                            </div>
+                            <div class="detail-stat-card">
+                                <span class="num" id="detail-streak-longest">0</span>
+                                <span class="label">Longest Streak</span>
+                            </div>
+                            <div class="detail-stat-card">
+                                <span class="num" id="detail-total-completed">0</span>
+                                <span class="label">Total Done</span>
+                            </div>
+                            <div class="detail-stat-card">
+                                <span class="num" id="detail-completion-rate">0%</span>
+                                <span class="label">Completion Rate</span>
+                            </div>
+                        </div>
+
+                        <!-- Calendar History Card -->
+                        <div class="calendar-history-card">
+                            <div class="calendar-card-header">
+                                <h3>Completion History</h3>
+                                <div class="calendar-month-controls">
+                                    <button class="icon-btn" id="calendar-prev-month" aria-label="Previous Month">
+                                        <i data-lucide="chevron-left"></i>
+                                    </button>
+                                    <span class="calendar-current-month" id="calendar-month-year-title">June 2026</span>
+                                    <button class="icon-btn" id="calendar-next-month" aria-label="Next Month">
+                                        <i data-lucide="chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Calendar Grid -->
+                            <div class="calendar-grid-container">
+                                <div class="calendar-weekdays-header">
+                                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                                </div>
+                                <div class="calendar-days-grid" id="detail-calendar-days">
+                                    <!-- Injected dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="calendar-legend">
+                                <div class="legend-item">
+                                    <span class="legend-color legend-empty"></span>
+                                    <span>Incomplete</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color legend-completed"></span>
+                                    <span>Completed</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color legend-disabled"></span>
+                                    <span>Rest Day</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal Dialog -->
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal-overlay" id="delete-modal-overlay"></div>
+        <div class="modal-content scale-in">
+            <h2>Delete Habit?</h2>
+            <p>Are you sure you want to delete this habit? This action will permanently wipe out all associated completion records and statistics. This cannot be undone.</p>
+            <div class="modal-actions-row">
+                <button class="btn btn-secondary" id="cancel-delete-btn">Cancel</button>
+                <button class="btn btn-danger btn-glow" id="confirm-delete-btn">Delete Permanently</button>
+            </div>
+        </div>
+    </div>
+    <!-- Core App JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
