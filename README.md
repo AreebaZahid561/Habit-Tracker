@@ -126,10 +126,10 @@ Requires [Node.js](https://nodejs.org/) installed.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/aurahabit.git
+git clone https://github.com/AreebaZahid561/Habit-Tracker.git
 
 # Navigate into the project folder
-cd aurahabit
+cd Habit-Tracker
 
 # Start the local server on port 3000
 npm run dev
